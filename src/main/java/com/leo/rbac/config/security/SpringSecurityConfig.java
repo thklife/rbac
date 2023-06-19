@@ -1,5 +1,6 @@
 package com.leo.rbac.config.security;
 
+import com.leo.rbac.config.security.filter.CheckTokenFilter;
 import com.leo.rbac.config.security.handler.AnonymousAuthenticationHandler;
 import com.leo.rbac.config.security.handler.CustomerAccessDeniedHandler;
 import com.leo.rbac.config.security.handler.LoginFailureHandler;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.annotation.Resource;
 
@@ -28,15 +30,19 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource
     private CustomerAccessDeniedHandler customerAccessDeniedHandler;
 
+    @Resource
+    private CheckTokenFilter checkTokenFilter;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //登录前进行过滤
+        http.addFilterBefore(checkTokenFilter, UsernamePasswordAuthenticationFilter.class);
         //表单登录
         http.formLogin()
                 .loginProcessingUrl("/api/user/login")
